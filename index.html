@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rex Gallery - Personal photo gallery application">
+    <meta name="keywords" content="photo gallery, images, upload photos, Rex gallery">
+    <meta name="author" content="Joeh Rex Kapoloma">
+    <title>Rex Gallery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">Rex Gallery</a>
+                <div class="nav-links">
+                    <a href="#profile">Profile</a>
+                    <a href="#gallery">Gallery</a>
+                    <a href="#upload">Upload</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Profile Section -->
+        <section id="profile" class="profile-section">
+            <div class="profile-pic-container">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" 
+                     alt="Profile Picture" class="profile-pic" id="profilePicture">
+                <div class="profile-pic-overlay">
+                    <i class="fas fa-camera"></i>
+                    <span>Change Photo</span>
+                </div>
+                <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+            </div>
+            <div class="profile-info">
+                <h1>Rex Joeh Kapoloma</h1>
+                <div class="profile-bio">
+                    <div class="bio-display" id="bioDisplay">
+                        <p id="bioText">RexJoeh | Kapoloma<br>Welcome to my personal photo gallery. Here you can find my collection of favorite moments and memories.</p>
+                    </div>
+                    <div class="bio-edit" id="bioEdit" style="display: none;">
+                        <textarea id="bioTextarea" rows="4">RexJoeh | Kapoloma&#10;Welcome to my personal photo gallery. Here you can find my collection of favorite moments and memories.</textarea>
+                        <div class="bio-edit-buttons">
+                            <button id="saveBio" class="save-btn">Save</button>
+                            <button id="cancelBio" class="cancel-btn">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="edit-profile-btn" id="editBioBtn">Edit Bio</button>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section id="upload" class="upload-section">
+            <h2>Upload Photos</h2>
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drag & drop your photos here or click to browse</p>
+                <p class="upload-hint">You can select multiple photos</p>
+                <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+            </div>
+            <div class="selected-files" id="selectedFiles" style="display: none;">
+                <h3>Selected Photos:</h3>
+                <div id="fileList"></div>
+            </div>
+            <button class="upload-btn" id="uploadBtn">Upload Photos</button>
+        </section>
+
+        <!-- Gallery Grid -->
+        <h2 class="gallery-title">My Photo Gallery</h2>
+        <div class="gallery" id="gallery">
+            <!-- Photos will be loaded here dynamically -->
+        </div>
+    </main>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h2>Delete Photo</h2>
+            <p>Are you sure you want to delete this photo? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="cancel-btn">Cancel</button>
+                <button class="confirm-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Rex Gallery. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>
