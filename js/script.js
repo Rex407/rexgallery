@@ -48,6 +48,9 @@ function initializeApp() {
     
     // Initialize upload button state
     uploadBtn.disabled = true;
+    
+    // Add dark mode toggle event listener
+    darkModeToggle.addEventListener('click', toggleDarkMode);
 }
 
 // Enhanced localStorage functions with error handling
@@ -434,4 +437,122 @@ editBioBtn.addEventListener('click', () => {
     editBioBtn.style.display = 'none';
 });
 
-saveBioBtn.addEventListener
+saveBioBtn.addEventListener('click', () => {
+    const newBio = bioTextarea.value;
+    bioText.innerHTML = newBio.replace(/\n/g, '<br>');
+    const success = setStorageItem('bio', newBio);
+    
+    bioEdit.style.display = 'none';
+    bioDisplay.style.display = 'block';
+    editBioBtn.style.display = 'block';
+    
+    if (success) {
+        alert('Bio updated successfully!');
+    } else {
+        alert('Bio updated, but failed to save to storage.');
+    }
+});
+
+cancelBioBtn.addEventListener('click', () => {
+    bioEdit.style.display = 'none';
+    bioDisplay.style.display = 'block';
+    editBioBtn.style.display = 'block';
+    // Reset textarea to current bio
+    bioTextarea.value = getStorageItem('bio') || bioTextarea.value;
+});
+
+// Delete button click handler
+function handleDeleteClick(galleryItem) {
+    photoToDelete = galleryItem;
+    deleteModal.style.display = 'flex';
+}
+
+// Cancel delete
+cancelBtn.addEventListener('click', () => {
+    deleteModal.style.display = 'none';
+    photoToDelete = null;
+});
+
+// Confirm delete
+confirmBtn.addEventListener('click', () => {
+    if (photoToDelete) {
+        const id = photoToDelete.getAttribute('data-id');
+        
+        // Remove from DOM
+        photoToDelete.remove();
+        
+        // Remove from localStorage
+        removeImageFromStorage(id);
+        
+        deleteModal.style.display = 'none';
+        photoToDelete = null;
+        alert('Photo deleted successfully!');
+    }
+});
+
+// Remove image from localStorage
+function removeImageFromStorage(id) {
+    const savedGallery = getStorageItem('gallery');
+    if (savedGallery) {
+        const images = JSON.parse(savedGallery);
+        const filteredImages = images.filter(img => img.id != id);
+        setStorageItem('gallery', JSON.stringify(filteredImages));
+    }
+}
+
+// Photo Viewer Event Listeners
+viewerClose.addEventListener('click', closePhotoViewer);
+zoomInBtn.addEventListener('click', zoomIn);
+zoomOutBtn.addEventListener('click', zoomOut);
+resetZoomBtn.addEventListener('click', resetZoom);
+downloadBtn.addEventListener('click', downloadImage);
+
+// Drag events for panning
+viewerBody.addEventListener('mousedown', startDrag);
+viewerBody.addEventListener('mousemove', dragImage);
+viewerBody.addEventListener('mouseup', stopDrag);
+viewerBody.addEventListener('mouseleave', stopDrag);
+
+// Touch events for mobile
+viewerBody.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startDrag(e.touches[0]);
+});
+
+viewerBody.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    dragImage(e.touches[0]);
+});
+
+viewerBody.addEventListener('touchend', stopDrag);
+
+// Close viewer when clicking outside the image
+photoViewer.addEventListener('click', (e) => {
+    if (e.target === photoViewer) {
+        closePhotoViewer();
+    }
+});
+
+// Keyboard controls
+document.addEventListener('keydown', (e) => {
+    if (photoViewer.style.display === 'flex') {
+        switch(e.key) {
+            case 'Escape':
+                closePhotoViewer();
+                break;
+            case '+':
+            case '=':
+                zoomIn();
+                break;
+            case '-':
+                zoomOut();
+                break;
+            case '0':
+                resetZoom();
+                break;
+        }
+    }
+});
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', initializeApp);
