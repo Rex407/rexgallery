@@ -19,8 +19,21 @@ const saveBioBtn = document.getElementById('saveBio');
 const cancelBioBtn = document.getElementById('cancelBio');
 const bioText = document.getElementById('bioText');
 
+// Photo Viewer Elements
+const photoViewer = document.getElementById('photoViewer');
+const viewerImage = document.getElementById('viewerImage');
+const viewerClose = document.getElementById('viewerClose');
+const zoomInBtn = document.getElementById('zoomIn');
+const zoomOutBtn = document.getElementById('zoomOut');
+const resetZoomBtn = document.getElementById('resetZoom');
+const downloadBtn = document.getElementById('downloadBtn');
+const imageInfo = document.getElementById('imageInfo');
+
 let photoToDelete = null;
 let selectedFiles = [];
+let currentZoom = 1;
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
 
 // Initialize the application
 function initializeApp() {
@@ -71,6 +84,13 @@ function createGalleryItem(imgSrc, id) {
         </div>
     `;
     
+    // Add click event to open photo viewer
+    galleryItem.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('delete-btn') && !e.target.classList.contains('fa-trash')) {
+            openPhotoViewer(imgSrc, id);
+        }
+    });
+    
     // Add event listener to delete button
     const deleteBtn = galleryItem.querySelector('.delete-btn');
     deleteBtn.addEventListener('click', (e) => {
@@ -78,14 +98,82 @@ function createGalleryItem(imgSrc, id) {
         handleDeleteClick(galleryItem);
     });
     
-    // Add event listener to expand button
-    const expandBtn = galleryItem.querySelector('.fa-expand');
-    expandBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        window.open(imgSrc, '_blank');
-    });
-    
     return galleryItem;
+}
+
+// Open photo viewer
+function openPhotoViewer(imgSrc, id) {
+    viewerImage.src = imgSrc;
+    currentZoom = 1;
+    viewerImage.style.transform = `scale(${currentZoom})`;
+    photoViewer.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Set image info
+    const img = new Image();
+    img.onload = function() {
+        imageInfo.textContent = `${img.naturalWidth} × ${img.naturalHeight} pixels`;
+    };
+    img.src = imgSrc;
+}
+
+// Close photo viewer
+function closePhotoViewer() {
+    photoViewer.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    resetZoom();
+}
+
+// Zoom functionality
+function zoomIn() {
+    if (currentZoom < 3) {
+        currentZoom += 0.25;
+        viewerImage.style.transform = `scale(${currentZoom})`;
+    }
+}
+
+function zoomOut() {
+    if (currentZoom > 0.5) {
+        currentZoom -= 0.25;
+        viewerImage.style.transform = `scale(${currentZoom})`;
+    }
+}
+
+function resetZoom() {
+    currentZoom = 1;
+    viewerImage.style.transform = `scale(${currentZoom})`;
+    viewerImage.style.left = '0px';
+    viewerImage.style.top = '0px';
+}
+
+// Download image
+function downloadImage() {
+    const link = document.createElement('a');
+    link.download = 'photo.jpg';
+    link.href = viewerImage.src;
+    link.click();
+}
+
+// Drag to pan functionality
+function startDrag(e) {
+    isDragging = true;
+    viewerImage.style.cursor = 'grabbing';
+    startX = e.pageX - viewerImage.offsetLeft;
+    startY = e.pageY - viewerImage.offsetTop;
+}
+
+function dragImage(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - startX;
+    const y = e.pageY - startY;
+    viewerImage.style.left = `${x}px`;
+    viewerImage.style.top = `${y}px`;
+}
+
+function stopDrag() {
+    isDragging = false;
+    viewerImage.style.cursor = 'grab';
 }
 
 // Upload area click event
@@ -253,6 +341,60 @@ function removeImageFromStorage(id) {
         localStorage.setItem('gallery', JSON.stringify(filteredImages));
     }
 }
+
+// Photo Viewer Event Listeners
+viewerClose.addEventListener('click', closePhotoViewer);
+zoomInBtn.addEventListener('click', zoomIn);
+zoomOutBtn.addEventListener('click', zoomOut);
+resetZoomBtn.addEventListener('click', resetZoom);
+downloadBtn.addEventListener('click', downloadImage);
+
+// Drag events for panning
+viewerImage.addEventListener('mousedown', startDrag);
+viewerImage.addEventListener('mousemove', dragImage);
+viewerImage.addEventListener('mouseup', stopDrag);
+viewerImage.addEventListener('mouseleave', stopDrag);
+
+// Touch events for mobile
+viewerImage.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startDrag(e.touches[0]);
+});
+
+viewerImage.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    dragImage(e.touches[0]);
+});
+
+viewerImage.addEventListener('touchend', stopDrag);
+
+// Close viewer when clicking outside the image
+photoViewer.addEventListener('click', (e) => {
+    if (e.target === photoViewer) {
+        closePhotoViewer();
+    }
+});
+
+// Keyboard controls
+document.addEventListener('keydown', (e) => {
+    if (photoViewer.style.display === 'flex') {
+        switch(e.key) {
+            case 'Escape':
+                closePhotoViewer();
+                break;
+            case '+':
+            case '=':
+                zoomIn();
+                break;
+            case '-':
+                zoomOut();
+                break;
+            case '0':
+                resetZoom();
+                break;
+        }
+    }
+});
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', initializeApp);
